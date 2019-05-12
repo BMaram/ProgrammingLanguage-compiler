@@ -1,0 +1,199 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */options{  static = true;}PARSER_BEGIN(MyLanguage)package project;
+
+public class MyLanguage{  public static void main(String args []) throws ParseException  {    MyLanguage parser = new MyLanguage(System.in);
+    while (true)
+    {
+      System.out.print("Enter your code:");
+      try
+      {
+        MyLanguage.code();
+        System.out.print("syntactically correct statement.\n");
+        
+      }
+      catch (Exception e)
+      {
+        System.out.println("Incorrect statement.");
+        System.out.println(e.getMessage());
+        MyLanguage.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("Incorrect statement.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }  }}PARSER_END(MyLanguage)
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| < "#" (~[ "\n", "\r" ])*         //Single Line comment start with #
+    (
+      "\n"
+    | "\r"
+    | "\r\n"
+    ) >
+| < "/*" (~[ "*" ])* "*"           //Multiple Line comment start with /* and end with */
+    (
+      ~[ "/" ] (~[ "*" ])* "*"
+    )*
+    "/" >  
+}
+
+TOKEN : /* Keywords */
+{
+  < IF : "if" >
+| < ELSE : "else" >
+| < WHILE : "while" >
+| < FOR : "for" >
+| < MAIN : "main" >
+| < VOID : "void" >
+| < INT : "int" >
+| < FLOAT : "float" >
+| < DOUBLE : "double" >
+| < PRINT : "print" >
+| < SCAN : "scan" >
+| < RETURN : "$" >
+| < OBRACKET :"(" >
+| < CBRACKET :")" >
+| < STRING : "string" >
+| < ASIGN : ":" >
+}
+
+TOKEN : /* arithmetic operation */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTIPLY : "*" >
+| < DIVIDE : "/" >
+| < EQUAL : "=" >
+| < INCREMENT : "++" >
+| < REM : "%" >
+}
+
+TOKEN : /* arithmetic operation */
+{
+  < LT : "<" >
+| < GT : ">" >
+| < LTE : "<=" >
+| < GTE : ">=" >
+| < EQ : "==" >
+}
+
+
+TOKEN : /* logical operation */
+{
+  < AND : "&" >
+| < OR : "|" >
+| < NOT : "~" >
+}
+
+
+TOKEN : /* numbers */
+{
+  < TERM  : <Int> | <Float> >
+| < #Int : (< DIGIT >)+ >
+| < #Float : (<DIGIT>)+("."(<DIGIT>)+)? >
+| < DIGIT : [ "0"-"9" ] >
+
+}
+
+TOKEN : /* letters */
+{
+  < ID : (<Letter>)+ >
+| < #Letter : "_" | [ "A"-"Z" ]| ["a"-"z"] >
+| < String : "'" (<DIGIT> | <Letter> | " ")+ "'" > 
+}
+
+TOKEN :
+{
+  < STOP : ";" >
+}
+
+void ArithmeticOperation() :
+{}
+{
+  < PLUS >
+| < MINUS >
+| < MULTIPLY >
+| < DIVIDE >
+| < REM >
+}
+
+void RelationalOperation() :
+{}
+{
+  < LT  >
+| < GT  >
+| < LTE >
+| < GTE >
+| < EQ  >
+}
+
+void LogicalOperation() :
+{}
+{
+  < AND  >
+| < OR   >
+| < NOT  >
+}
+
+void arithmeticStatment() :
+{}
+{
+  <TERM> ((ArithmeticOperation() <TERM>)+)?
+}
+
+void CONDITION() :
+{ }
+{
+  (<ID> | <TERM>) RelationalOperation() (<ID> | <TERM>)
+}
+
+void logicalStatment() :
+{ }
+{
+  CONDITION() (LogicalOperation() CONDITION())?
+}
+
+
+void IfStatement() :
+{}
+{
+  <IF> <OBRACKET> logicalStatment() <CBRACKET>  exp() ( <ELSE>  exp() )? 
+}
+
+
+void exp() :
+{ }
+{
+  <ID> ("[" <Int>"]")? <ASIGN> (arithmeticStatment() | <String >)
+| <PRINT> ( <String >  | <ID>) 
+}
+
+void dataType() :
+{ }
+{
+  < INT > <ID > ( <ASIGN> arithmeticStatment() )?
+| < FLOAT > <ID > ( <ASIGN> arithmeticStatment() )?
+| < STRING > <ID > ( <ASIGN>  <String > )?  
+}
+
+void array() :
+{ }
+{
+  < INT > "[" "]"<ID > 
+| < FLOAT >"[" "]" <ID > 
+| < STRING >"[" "]" <ID >  
+}
+
+
+void code() :
+{ }
+{
+ ( arithmeticStatment() | dataType() | IfStatement() |array() ) < STOP >
+}
